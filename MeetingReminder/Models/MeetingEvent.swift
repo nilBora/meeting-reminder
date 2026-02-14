@@ -1,0 +1,75 @@
+import EventKit
+import Foundation
+
+struct MeetingEvent: Identifiable, Equatable {
+    let id: String
+    let title: String
+    let startDate: Date
+    let endDate: Date
+    let calendar: String
+    let calendarColor: String
+    let videoLink: URL?
+    let isAllDay: Bool
+
+    var timeUntilStart: TimeInterval {
+        startDate.timeIntervalSinceNow
+    }
+
+    var minutesUntilStart: Int {
+        Int(ceil(timeUntilStart / 60))
+    }
+
+    var isHappeningSoon: Bool {
+        timeUntilStart > 0 && timeUntilStart <= 600
+    }
+
+    var isInProgress: Bool {
+        let now = Date()
+        return now >= startDate && now < endDate
+    }
+
+    var formattedStartTime: String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: startDate)
+    }
+
+    var formattedTimeUntil: String {
+        let minutes = minutesUntilStart
+        if minutes <= 0 {
+            return "Now"
+        } else if minutes == 1 {
+            return "1 minute"
+        } else {
+            return "\(minutes) minutes"
+        }
+    }
+
+    static func == (lhs: MeetingEvent, rhs: MeetingEvent) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    init(from ekEvent: EKEvent, videoLink: URL?) {
+        self.id = ekEvent.eventIdentifier ?? UUID().uuidString
+        self.title = ekEvent.title ?? "Untitled Meeting"
+        self.startDate = ekEvent.startDate
+        self.endDate = ekEvent.endDate
+        self.calendar = ekEvent.calendar.title
+        self.calendarColor = ""
+        self.videoLink = videoLink
+        self.isAllDay = ekEvent.isAllDay
+    }
+
+    init(id: String, title: String, startDate: Date, endDate: Date,
+         calendar: String, calendarColor: String = "",
+         videoLink: URL? = nil, isAllDay: Bool = false) {
+        self.id = id
+        self.title = title
+        self.startDate = startDate
+        self.endDate = endDate
+        self.calendar = calendar
+        self.calendarColor = calendarColor
+        self.videoLink = videoLink
+        self.isAllDay = isAllDay
+    }
+}
