@@ -6,14 +6,16 @@ struct OverlayView: View {
     let onSnooze: () -> Void
     let onJoin: () -> Void
 
+    @AppStorage("overlayBackground") private var overlayBackground: String = "dark"
     @State private var appeared = false
     @State private var countdown: String = ""
     @State private var timer: Timer?
 
     var body: some View {
         ZStack {
-            // Background blur/dim
-            Color.black.opacity(0.85)
+            // Background
+            Rectangle()
+                .fill(currentBackground)
 
             VStack(spacing: 24) {
                 Spacer()
@@ -117,6 +119,11 @@ struct OverlayView: View {
         .onDisappear {
             timer?.invalidate()
         }
+    }
+
+    private var currentBackground: AnyShapeStyle {
+        let bg = OverlayBackground(rawValue: overlayBackground) ?? .dark
+        return bg.previewGradient
     }
 
     private var videoServiceName: String {

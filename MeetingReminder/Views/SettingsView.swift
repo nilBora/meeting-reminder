@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsView: View {
     @AppStorage("reminderMinutes") private var reminderMinutes: Int = 5
     @AppStorage("soundEnabled") private var soundEnabled: Bool = true
+    @AppStorage("overlayBackground") private var overlayBackground: String = "dark"
     @ObservedObject var calendarService: CalendarService
 
     @State private var launchAtLogin = false
@@ -17,12 +18,17 @@ struct SettingsView: View {
                     Label("General", systemImage: "gear")
                 }
 
+            appearanceTab
+                .tabItem {
+                    Label("Appearance", systemImage: "paintbrush")
+                }
+
             calendarsTab
                 .tabItem {
                     Label("Calendars", systemImage: "calendar")
                 }
         }
-        .frame(width: 420, height: 320)
+        .frame(width: 460, height: 380)
         .onAppear {
             loadSettings()
         }
@@ -69,6 +75,44 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .padding()
+    }
+
+    private var appearanceTab: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Overlay Background")
+                .font(.headline)
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 12)], spacing: 12) {
+                ForEach(OverlayBackground.allCases) { bg in
+                    Button {
+                        overlayBackground = bg.rawValue
+                    } label: {
+                        VStack(spacing: 6) {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(bg.previewGradient)
+                                .frame(height: 70)
+                                .overlay(
+                                    Text("Aa")
+                                        .font(.title2.bold())
+                                        .foregroundColor(.white)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(overlayBackground == bg.rawValue ? Color.accentColor : Color.clear, lineWidth: 3)
+                                )
+
+                            Text(bg.displayName)
+                                .font(.caption)
+                                .foregroundColor(overlayBackground == bg.rawValue ? .accentColor : .secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            Spacer()
+        }
         .padding()
     }
 
@@ -142,6 +186,96 @@ struct SettingsView: View {
             } catch {
                 print("Failed to \(enabled ? "enable" : "disable") launch at login: \(error)")
             }
+        }
+    }
+}
+
+enum OverlayBackground: String, CaseIterable, Identifiable {
+    case dark
+    case blue
+    case purple
+    case gradient
+    case red
+    case green
+    case nightOcean
+    case electric
+    case cyber
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .dark: return "Dark"
+        case .blue: return "Blue"
+        case .purple: return "Purple"
+        case .gradient: return "Sunset"
+        case .red: return "Red"
+        case .green: return "Green"
+        case .nightOcean: return "Night Ocean"
+        case .electric: return "Electric"
+        case .cyber: return "Cyber"
+        }
+    }
+
+    var previewGradient: AnyShapeStyle {
+        switch self {
+        case .dark:
+            return AnyShapeStyle(Color.black.opacity(0.85))
+        case .blue:
+            return AnyShapeStyle(
+                LinearGradient(colors: [Color(red: 0.05, green: 0.1, blue: 0.3).opacity(0.88),
+                                        Color(red: 0.1, green: 0.2, blue: 0.5).opacity(0.88)],
+                               startPoint: .top, endPoint: .bottom)
+            )
+        case .purple:
+            return AnyShapeStyle(
+                LinearGradient(colors: [Color(red: 0.2, green: 0.05, blue: 0.3).opacity(0.88),
+                                        Color(red: 0.4, green: 0.1, blue: 0.5).opacity(0.88)],
+                               startPoint: .top, endPoint: .bottom)
+            )
+        case .gradient:
+            return AnyShapeStyle(
+                LinearGradient(colors: [Color(red: 0.1, green: 0.05, blue: 0.2).opacity(0.88),
+                                        Color(red: 0.4, green: 0.1, blue: 0.2).opacity(0.88),
+                                        Color(red: 0.6, green: 0.2, blue: 0.1).opacity(0.88)],
+                               startPoint: .topLeading, endPoint: .bottomTrailing)
+            )
+        case .red:
+            return AnyShapeStyle(
+                LinearGradient(colors: [Color(red: 0.3, green: 0.02, blue: 0.02).opacity(0.88),
+                                        Color(red: 0.5, green: 0.05, blue: 0.05).opacity(0.88)],
+                               startPoint: .top, endPoint: .bottom)
+            )
+        case .green:
+            return AnyShapeStyle(
+                LinearGradient(colors: [Color(red: 0.02, green: 0.15, blue: 0.1).opacity(0.88),
+                                        Color(red: 0.05, green: 0.3, blue: 0.15).opacity(0.88)],
+                               startPoint: .top, endPoint: .bottom)
+            )
+        case .nightOcean:
+            // #0a0e14 → #111821 → #1b2632 with cyan accent glow
+            return AnyShapeStyle(
+                LinearGradient(colors: [Color(red: 0.039, green: 0.055, blue: 0.078).opacity(0.92),
+                                        Color(red: 0.067, green: 0.094, blue: 0.129).opacity(0.90),
+                                        Color(red: 0.106, green: 0.149, blue: 0.196).opacity(0.88)],
+                               startPoint: .top, endPoint: .bottom)
+            )
+        case .electric:
+            // #0f172a → #1e293b → #334155 with neon blue tint
+            return AnyShapeStyle(
+                LinearGradient(colors: [Color(red: 0.059, green: 0.09, blue: 0.165).opacity(0.92),
+                                        Color(red: 0.118, green: 0.161, blue: 0.231).opacity(0.90),
+                                        Color(red: 0.2, green: 0.255, blue: 0.333).opacity(0.88)],
+                               startPoint: .top, endPoint: .bottom)
+            )
+        case .cyber:
+            // #050505 → #0d1117 → #161b22 with subtle blue glow
+            return AnyShapeStyle(
+                LinearGradient(colors: [Color(red: 0.02, green: 0.02, blue: 0.02).opacity(0.93),
+                                        Color(red: 0.051, green: 0.067, blue: 0.09).opacity(0.91),
+                                        Color(red: 0.086, green: 0.106, blue: 0.133).opacity(0.88)],
+                               startPoint: .top, endPoint: .bottom)
+            )
         }
     }
 }
