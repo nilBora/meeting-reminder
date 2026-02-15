@@ -139,7 +139,12 @@ private struct PreferencesButton: View {
             Button {
                 onDismiss()
                 NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-                NSApp.activate(ignoringOtherApps: true)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    NSApp.activate(ignoringOtherApps: true)
+                    for window in NSApp.windows where window.title.contains("Settings") || window.title.contains("Preferences") {
+                        window.orderFrontRegardless()
+                    }
+                }
             } label: {
                 Text("Preferences…")
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -156,8 +161,14 @@ private struct PreferencesButton14: View {
 
     var body: some View {
         Button {
-            openSettings()
             onDismiss()
+            openSettings()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                NSApp.activate(ignoringOtherApps: true)
+                for window in NSApp.windows where window.title.contains("Settings") || window.title.contains("Preferences") {
+                    window.orderFrontRegardless()
+                }
+            }
         } label: {
             Text("Preferences…")
                 .frame(maxWidth: .infinity, alignment: .leading)
