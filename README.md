@@ -1,10 +1,20 @@
-# Meeting Reminder for Mac
+<p align="center">
+  <img src="docs/logo.png" width="128" height="128" alt="Meeting Reminder icon">
+</p>
 
-A native macOS menu bar app that reads your calendar and displays a full-screen blocking overlay before meetings — so you never miss one. Detects video conference links (Zoom, Google Meet, Teams, Webex, Slack) and provides a one-click **Join** button.
+<h1 align="center">Meeting Reminder for Mac</h1>
 
-Inspired by [In Your Face](https://www.inyourface.app).
+<p align="center">
+A native macOS menu bar app that reads your calendar and displays a full-screen blocking overlay before meetings — so you never miss one. Detects video conference links (Zoom, Google Meet, Teams, Webex, Slack) and provides a one-click <strong>Join</strong> button.
+</p>
 
-![macOS](https://img.shields.io/badge/macOS-13%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5-orange) ![License](https://img.shields.io/badge/license-MIT-green)
+<p align="center">
+Inspired by <a href="https://www.inyourface.app">In Your Face</a>.
+</p>
+
+<p align="center">
+<img src="https://img.shields.io/badge/macOS-13%2B-blue" alt="macOS"> <img src="https://img.shields.io/badge/Swift-5-orange" alt="Swift"> <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+</p>
 
 ## Features
 
