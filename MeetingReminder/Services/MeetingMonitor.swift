@@ -99,7 +99,7 @@ final class MeetingMonitor: ObservableObject {
     }
 }
 
-private extension Int {
+extension Int {
     func clamped(to range: ClosedRange<Int>, default defaultValue: Int) -> Int {
         if self == 0 { return defaultValue }
         return Swift.min(Swift.max(self, range.lowerBound), range.upperBound)
