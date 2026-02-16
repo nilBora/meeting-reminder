@@ -20,9 +20,16 @@ Inspired by [In Your Face](https://www.inyourface.app).
 
 ## Screenshots
 
-| Menu Bar | Overlay | Settings |
-|----------|---------|----------|
-| Upcoming meetings list with quick-join buttons | Full-screen blocking reminder with countdown | Background themes, reminder timing, calendar selection |
+![Full-screen overlay with countdown and Join button](docs/screenshots/lock-screen.png)
+
+<details>
+<summary>Preferences</summary>
+
+| General | Appearance | Calendars |
+|---------|------------|-----------|
+| ![General](docs/screenshots/preference-general.png) | ![Appearance](docs/screenshots/preference-appearance.png) | ![Calendars](docs/screenshots/preference-calendar.png) |
+
+</details>
 
 ## Requirements
 
