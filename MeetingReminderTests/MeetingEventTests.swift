@@ -38,6 +38,21 @@ final class MeetingEventTests: XCTestCase {
         XCTAssertEqual(event.formattedTimeUntil, "Now")
     }
 
+    func testFormattedTimeUntilExactHour() {
+        let event = makeEvent(startingIn: 60)
+        XCTAssertEqual(event.formattedTimeUntil, "1 h")
+    }
+
+    func testFormattedTimeUntilHoursAndMinutes() {
+        let event = makeEvent(startingIn: 90)
+        XCTAssertEqual(event.formattedTimeUntil, "1 h 30 min")
+    }
+
+    func testFormattedTimeUntilMultipleHours() {
+        let event = makeEvent(startingIn: 150)
+        XCTAssertEqual(event.formattedTimeUntil, "2 h 30 min")
+    }
+
     // MARK: - minutesUntilStart
 
     func testMinutesUntilStartPositive() {
