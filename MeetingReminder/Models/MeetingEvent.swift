@@ -35,13 +35,21 @@ struct MeetingEvent: Identifiable, Equatable {
     }
 
     var formattedTimeUntil: String {
-        let minutes = minutesUntilStart
-        if minutes <= 0 {
+        let totalMinutes = minutesUntilStart
+        if totalMinutes <= 0 {
             return "Now"
-        } else if minutes == 1 {
+        } else if totalMinutes == 1 {
             return "1 minute"
+        } else if totalMinutes < 60 {
+            return "\(totalMinutes) minutes"
         } else {
-            return "\(minutes) minutes"
+            let hours = totalMinutes / 60
+            let minutes = totalMinutes % 60
+            if minutes == 0 {
+                return "\(hours) h"
+            } else {
+                return "\(hours) h \(minutes) min"
+            }
         }
     }
 
