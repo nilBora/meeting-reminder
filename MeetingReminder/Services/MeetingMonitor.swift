@@ -11,6 +11,7 @@ final class MeetingMonitor: ObservableObject {
     private var checkTimer: Timer?
     private var shownEventIDs: Set<String> = []
     private var snoozedEvents: [String: Date] = [:]
+    private var lastCleanupDate: Date = Date()
     private var cancellables = Set<AnyCancellable>()
 
     var reminderMinutes: Int {
@@ -59,7 +60,14 @@ final class MeetingMonitor: ObservableObject {
         let now = Date()
         let reminderSeconds = TimeInterval(reminderMinutes * 60)
 
-        // Clean up expired snoozes and old shown IDs
+        // Reset shown IDs at the start of a new day
+        if !Calendar.current.isDate(now, inSameDayAs: lastCleanupDate) {
+            shownEventIDs.removeAll()
+            snoozedEvents.removeAll()
+            lastCleanupDate = now
+        }
+
+        // Clean up expired snoozes
         snoozedEvents = snoozedEvents.filter { $0.value > now }
 
         for event in calendarService.events {

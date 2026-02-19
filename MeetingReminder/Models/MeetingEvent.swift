@@ -58,7 +58,10 @@ struct MeetingEvent: Identifiable, Equatable {
     }
 
     init(from ekEvent: EKEvent, videoLink: URL?) {
-        self.id = ekEvent.eventIdentifier ?? UUID().uuidString
+        // Use eventIdentifier + startDate to uniquely identify recurring event occurrences
+        let baseID = ekEvent.eventIdentifier ?? UUID().uuidString
+        let dateStamp = ISO8601DateFormatter().string(from: ekEvent.startDate)
+        self.id = "\(baseID)_\(dateStamp)"
         self.title = ekEvent.title ?? "Untitled Meeting"
         self.startDate = ekEvent.startDate
         self.endDate = ekEvent.endDate

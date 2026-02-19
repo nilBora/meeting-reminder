@@ -2,6 +2,15 @@
 
 All notable changes to Meeting Reminder will be documented in this file.
 
+## [1.0.1] - 2026-02-19
+
+### Fixed
+- Recurring events not triggering overlay on subsequent days — EventKit returns the same `eventIdentifier` for every occurrence, so the event was incorrectly marked as already shown. Event ID now includes the start date to uniquely identify each occurrence
+- Daily cleanup of shown/snoozed event sets to prevent stale state across days
+
+### Improved
+- Time until meeting now displays in hours and minutes (e.g. "1 h 30 min") instead of raw minutes for events 60+ minutes away
+
 ## [1.0.0] - 2026-02-17
 
 ### Initial Release
