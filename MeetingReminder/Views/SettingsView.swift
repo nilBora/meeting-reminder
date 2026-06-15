@@ -7,6 +7,7 @@ struct SettingsView: View {
     @AppStorage("soundEnabled") private var soundEnabled: Bool = true
     @AppStorage("requireAction") private var requireAction: Bool = false
     @AppStorage("overlayBackground") private var overlayBackground: String = "dark"
+    @AppStorage("overlayOpacity") private var overlayOpacity: Double = 1.0
     @AppStorage("endReminderMinutes") private var endReminderMinutes: Int = 0
     @AppStorage(WorkingHoursEvents.enabledKey) private var workingHoursEnabled: Bool = false
     @AppStorage(WorkingHoursEvents.startMinutesKey) private var workingHoursStartMinutes: Int = WorkingHoursEvents.defaultStartMinutes
@@ -165,6 +166,17 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                 }
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("Overlay opacity")
+                    Spacer()
+                    Text("\(Int(overlayOpacity * 100))%")
+                        .foregroundColor(.secondary)
+                        .monospacedDigit()
+                }
+                Slider(value: $overlayOpacity, in: 0.3...1.0, step: 0.05)
             }
 
             Spacer()

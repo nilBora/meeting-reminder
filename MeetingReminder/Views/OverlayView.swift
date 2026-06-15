@@ -8,6 +8,7 @@ struct OverlayView: View {
     let onJoin: () -> Void
 
     @AppStorage("overlayBackground") private var overlayBackground: String = "dark"
+    @AppStorage("overlayOpacity") private var overlayOpacity: Double = 1.0
     @AppStorage("requireAction") private var requireAction: Bool = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
@@ -22,6 +23,7 @@ struct OverlayView: View {
             // Background
             Rectangle()
                 .fill(currentBackground)
+                .opacity(overlayOpacity)
 
             VStack(spacing: 24) {
                 Spacer()
@@ -42,7 +44,11 @@ struct OverlayView: View {
                 // Time info
                 Text(countdown)
                     .font(.system(size: 28, weight: .medium).monospacedDigit())
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(Color.white.opacity(0.15))
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                 Text(secondaryTimeText)
                     .font(.system(size: 20))
