@@ -8,6 +8,9 @@ xcuserdata/
 build/
 DerivedData/
 
+# Local Git worktrees
+.worktrees/
+
 # Icon generation
 __pycache__/
 .dmg

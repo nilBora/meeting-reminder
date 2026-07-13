@@ -70,6 +70,24 @@ final class VideoLinkDetectorTests: XCTestCase {
         XCTAssertFalse(url!.absoluteString.hasSuffix("\""))
     }
 
+    func testFindsZoomLinkWithoutAttachedMarkupOrText() {
+        let text = "Join https://zoom.us/j/123456789</br></br>Meeting"
+
+        XCTAssertEqual(
+            VideoLinkDetector.findVideoURL(in: text)?.absoluteString,
+            "https://zoom.us/j/123456789"
+        )
+    }
+
+    func testFindsTeamsLinkWithoutAttachedMarkupOrText() {
+        let text = "Join https://teams.microsoft.com/l/meetup-join/19%3ameeting_abc%40thread.v2/0</br>Meeting"
+
+        XCTAssertEqual(
+            VideoLinkDetector.findVideoURL(in: text)?.absoluteString,
+            "https://teams.microsoft.com/l/meetup-join/19%3ameeting_abc%40thread.v2/0"
+        )
+    }
+
     // MARK: - isVideoLink(_:)
 
     func testIsVideoLinkReturnsTrueForZoom() {
@@ -85,6 +103,33 @@ final class VideoLinkDetectorTests: XCTestCase {
     func testIsVideoLinkReturnsFalseForRegularURL() {
         let url = URL(string: "https://www.google.com")!
         XCTAssertFalse(VideoLinkDetector.isVideoLink(url))
+    }
+
+    // MARK: - Native app URLs
+
+    func testNativeAppURLConvertsZoomAndPreservesPassword() {
+        let url = URL(string: "https://zoom.us/j/123456789?pwd=secret123")!
+        let native = VideoLinkDetector.nativeAppURL(for: url)
+
+        XCTAssertEqual(native?.scheme, "zoommtg")
+        XCTAssertEqual(native?.host, "zoom.us")
+        XCTAssertTrue(native?.absoluteString.contains("confno=123456789") == true)
+        XCTAssertTrue(native?.absoluteString.contains("pwd=secret123") == true)
+    }
+
+    func testNativeAppURLConvertsCleanedTeamsLink() {
+        let url = URL(string: "https://teams.microsoft.com/l/meetup-join/19%3ameeting_abc%40thread.v2/0</br>Meeting")!
+        let native = VideoLinkDetector.nativeAppURL(for: url)
+
+        XCTAssertEqual(native?.scheme, "msteams")
+        XCTAssertEqual(native?.host, "teams.microsoft.com")
+        XCTAssertFalse(native?.absoluteString.contains("Meeting") == true)
+    }
+
+    func testPreferredMeetingURLLeavesGoogleMeetAsWebURL() {
+        let url = URL(string: "https://meet.google.com/abc-defg-hij")!
+
+        XCTAssertEqual(VideoLinkDetector.preferredMeetingURL(for: url), url)
     }
 
     // MARK: - serviceName(for:)

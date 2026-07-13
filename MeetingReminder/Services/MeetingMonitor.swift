@@ -103,7 +103,7 @@ final class MeetingMonitor: ObservableObject {
 
     func joinMeeting() {
         guard let event = activeOverlayEvent, let url = event.videoLink else { return }
-        NSWorkspace.shared.open(url)
+        VideoLinkDetector.openMeetingURL(url)
         dismiss()
     }
 
