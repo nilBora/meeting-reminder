@@ -9,6 +9,15 @@ struct MenuBarView: View {
         calendarService.events.filter { $0.timeUntilStart > -300 }
     }
 
+    // Captures everything that affects the popover's height. Changing this forces SwiftUI to
+    // rebuild the hosted view so the MenuBarExtra(.window) NSPanel re-measures its content
+    // size, otherwise dynamic content changes get clipped top & bottom until an app restart.
+    private var contentSignature: String {
+        if calendarService.authorizationStatus != .authorized { return "access" }
+        let count = min(upcomingEvents.count, 5)
+        return count == 0 ? "empty" : "list-\(count)"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if calendarService.authorizationStatus != .authorized {
@@ -39,6 +48,8 @@ struct MenuBarView: View {
         }
         .padding(12)
         .frame(width: 280)
+        .fixedSize(horizontal: false, vertical: true)
+        .id(contentSignature)
     }
 
     // MARK: - Sections
