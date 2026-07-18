@@ -114,7 +114,7 @@ struct MenuBarView: View {
 
             if let url = event.videoLink {
                 Button {
-                    NSWorkspace.shared.open(url)
+                    VideoLinkDetector.openMeetingURL(url)
                 } label: {
                     Image(systemName: "video.fill")
                         .font(.system(size: 12))
