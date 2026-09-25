@@ -8,6 +8,9 @@ struct SettingsView: View {
     @AppStorage("requireAction") private var requireAction: Bool = false
     @AppStorage("overlayBackground") private var overlayBackground: String = "dark"
     @AppStorage("endReminderMinutes") private var endReminderMinutes: Int = 0
+    @AppStorage(ReminderFilter.meetingsOnlyKey) private var meetingsOnly: Bool = false
+    @AppStorage(ReminderFilter.skipFreeEventsKey) private var skipFreeEvents: Bool = false
+    @AppStorage(ReminderFilter.excludedKeywordsKey) private var excludedKeywords: String = ""
     @AppStorage(WorkingHoursEvents.enabledKey) private var workingHoursEnabled: Bool = false
     @AppStorage(WorkingHoursEvents.startMinutesKey) private var workingHoursStartMinutes: Int = WorkingHoursEvents.defaultStartMinutes
     @AppStorage(WorkingHoursEvents.endMinutesKey) private var workingHoursEndMinutes: Int = WorkingHoursEvents.defaultEndMinutes
@@ -81,6 +84,20 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
             }
+
+            Section("Which events trigger reminders") {
+                Toggle("Only meetings (video link or other participants)", isOn: $meetingsOnly)
+                Toggle("Skip events marked as Free", isOn: $skipFreeEvents)
+                VStack(alignment: .leading, spacing: 4) {
+                    TextField("Ignore titles containing:", text: $excludedKeywords, prompt: Text("Focus, Lunch, Block"))
+                    Text("Comma-separated, case-insensitive.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .onChange(of: meetingsOnly) { _ in calendarService.fetchEvents() }
+            .onChange(of: skipFreeEvents) { _ in calendarService.fetchEvents() }
+            .onChange(of: excludedKeywords) { _ in calendarService.fetchEvents() }
 
             Section {
                 Toggle("Play sound with reminder", isOn: $soundEnabled)

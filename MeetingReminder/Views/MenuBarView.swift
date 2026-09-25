@@ -108,6 +108,14 @@ struct MenuBarView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
 
+                    if !event.triggersReminder {
+                        Image(systemName: "bell.slash")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .help("No reminder")
+                            .accessibilityLabel("No reminder")
+                    }
+
                     if event.isInProgress {
                         Text("· In progress")
                             .font(.caption2)
@@ -139,6 +147,7 @@ struct MenuBarView: View {
             }
         }
         .padding(.vertical, 4)
+        .opacity(event.triggersReminder ? 1 : 0.5)
     }
 
 }

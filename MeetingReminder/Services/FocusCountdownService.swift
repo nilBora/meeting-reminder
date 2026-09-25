@@ -41,7 +41,7 @@ final class FocusCountdownService: ObservableObject {
 
     private func tick() {
         let now = Date()
-        let allEvents = calendarService.events
+        let allEvents = calendarService.events.filter(\.triggersReminder)
 
         // A meeting in progress takes priority: count down to its end and keep
         // tracking it until it's over, even if a later meeting is already queued.

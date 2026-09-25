@@ -132,7 +132,7 @@ final class MeetingMonitor: ObservableObject {
     private func checkStartReminders(now: Date) {
         let reminderSeconds = TimeInterval(reminderMinutes * 60)
 
-        for event in calendarService.events {
+        for event in calendarService.events where event.triggersReminder {
             let timeUntil = event.startDate.timeIntervalSince(now)
 
             // Skip if already shown
@@ -163,7 +163,7 @@ final class MeetingMonitor: ObservableObject {
         let windowSeconds = TimeInterval(endReminderMinutes * 60)
         let preReminderSeconds = TimeInterval(reminderMinutes * 60)
 
-        for event in calendarService.events {
+        for event in calendarService.events where event.triggersReminder {
             // Skip if user acknowledged this meeting's end-reminder
             if endReminderShownEventIDs.contains(event.id) { continue }
 
@@ -182,6 +182,7 @@ final class MeetingMonitor: ObservableObject {
             // Suppress if another upcoming meeting's pre-meeting reminder would fire
             // before or at this meeting's end — the regular start-reminder will cover the transition.
             let hasBackToBack = calendarService.events.contains { other in
+                other.triggersReminder &&
                 other.id != event.id &&
                 other.startDate > now &&
                 other.startDate.addingTimeInterval(-preReminderSeconds) <= event.endDate

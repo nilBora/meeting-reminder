@@ -71,6 +71,13 @@ final class CalendarService: ObservableObject, CalendarServiceProtocol {
             UserDefaults.standard.stringArray(forKey: "enabledCalendarIDs") ?? []
         )
 
+        let defaults = UserDefaults.standard
+        let meetingsOnly = defaults.bool(forKey: ReminderFilter.meetingsOnlyKey)
+        let skipFree = defaults.bool(forKey: ReminderFilter.skipFreeEventsKey)
+        let excludedKeywords = ReminderFilter.parseKeywords(
+            defaults.string(forKey: ReminderFilter.excludedKeywordsKey) ?? ""
+        )
+
         let realEvents = ekEvents
             .filter { event in
                 // Filter out all-day events
@@ -92,7 +99,19 @@ final class CalendarService: ObservableObject, CalendarServiceProtocol {
             }
             .map { ekEvent in
                 let videoLink = VideoLinkDetector.detectLink(in: ekEvent)
-                return MeetingEvent(from: ekEvent, videoLink: videoLink)
+                let otherAttendeeCount = (ekEvent.attendees ?? []).filter {
+                    !$0.isCurrentUser && $0.participantType != .room && $0.participantType != .resource
+                }.count
+                let triggersReminder = ReminderFilter.triggersReminder(
+                    title: ekEvent.title ?? "",
+                    hasVideoLink: videoLink != nil,
+                    otherAttendeeCount: otherAttendeeCount,
+                    isFree: ekEvent.availability == .free,
+                    meetingsOnly: meetingsOnly,
+                    skipFree: skipFree,
+                    excludedKeywords: excludedKeywords
+                )
+                return MeetingEvent(from: ekEvent, videoLink: videoLink, triggersReminder: triggersReminder)
             }
 
         events = (realEvents + WorkingHoursEvents.synthesize(for: now))

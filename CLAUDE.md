@@ -60,6 +60,9 @@ MeetingReminder/
 | `workingHoursStartMinutes` | Int | 540 (09:00) | Start of working hours, minutes since midnight |
 | `workingHoursEndMinutes` | Int | 1020 (17:00) | End of working hours, minutes since midnight |
 | `workingHoursDays` | Int (bitmask) | 62 (Mon–Fri) | Days the synthetic events fire; bit 0 = Sunday |
+| `meetingsOnly` | Bool | false | Remind only for events with a video link or another (non-room) attendee |
+| `skipFreeEvents` | Bool | false | Don't remind for events whose availability is Free |
+| `excludedTitleKeywords` | String | "" | Comma-separated; events whose title contains any keyword don't remind |
 
 ## Icon Generation
 
