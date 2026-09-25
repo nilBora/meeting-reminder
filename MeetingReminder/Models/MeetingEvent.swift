@@ -10,6 +10,8 @@ struct MeetingEvent: Identifiable, Equatable {
     let calendarColor: String
     let videoLink: URL?
     let isAllDay: Bool
+    /// False for events the user asked not to be reminded about (see `ReminderFilter`).
+    let triggersReminder: Bool
 
     var timeUntilStart: TimeInterval {
         startDate.timeIntervalSinceNow
@@ -57,7 +59,7 @@ struct MeetingEvent: Identifiable, Equatable {
         lhs.id == rhs.id
     }
 
-    init(from ekEvent: EKEvent, videoLink: URL?) {
+    init(from ekEvent: EKEvent, videoLink: URL?, triggersReminder: Bool = true) {
         // Use eventIdentifier + startDate to uniquely identify recurring event occurrences
         let baseID = ekEvent.eventIdentifier ?? UUID().uuidString
         let dateStamp = ISO8601DateFormatter().string(from: ekEvent.startDate)
@@ -69,11 +71,13 @@ struct MeetingEvent: Identifiable, Equatable {
         self.calendarColor = ""
         self.videoLink = videoLink
         self.isAllDay = ekEvent.isAllDay
+        self.triggersReminder = triggersReminder
     }
 
     init(id: String, title: String, startDate: Date, endDate: Date,
          calendar: String, calendarColor: String = "",
-         videoLink: URL? = nil, isAllDay: Bool = false) {
+         videoLink: URL? = nil, isAllDay: Bool = false,
+         triggersReminder: Bool = true) {
         self.id = id
         self.title = title
         self.startDate = startDate
@@ -82,5 +86,6 @@ struct MeetingEvent: Identifiable, Equatable {
         self.calendarColor = calendarColor
         self.videoLink = videoLink
         self.isAllDay = isAllDay
+        self.triggersReminder = triggersReminder
     }
 }

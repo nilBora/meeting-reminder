@@ -18,10 +18,12 @@ final class MeetingMonitorTests: XCTestCase {
         return monitor
     }
 
-    private func makeEvent(id: String = "e1", startingIn minutes: Double, duration: Double = 30) -> MeetingEvent {
+    private func makeEvent(id: String = "e1", startingIn minutes: Double, duration: Double = 30,
+                           triggersReminder: Bool = true) -> MeetingEvent {
         let start = Date().addingTimeInterval(minutes * 60)
         let end = start.addingTimeInterval(duration * 60)
-        return MeetingEvent(id: id, title: "Test", startDate: start, endDate: end, calendar: "Work")
+        return MeetingEvent(id: id, title: "Test", startDate: start, endDate: end, calendar: "Work",
+                            triggersReminder: triggersReminder)
     }
 
     // MARK: - Upcoming meeting triggers overlay
@@ -221,6 +223,52 @@ final class MeetingMonitorTests: XCTestCase {
         XCTAssertEqual(monitor.activeOverlayKind, .ending)
         monitor.dismiss()
         XCTAssertEqual(monitor.activeOverlayKind, .start)
+    }
+
+    // MARK: - Non-reminding events (meetings-only filter)
+
+    func testEventWithoutReminderDoesNotTriggerOverlay() {
+        let event = makeEvent(startingIn: 3, triggersReminder: false)
+        let monitor = makeMonitor(events: [event])
+        monitor.start()
+        XCTAssertFalse(monitor.shouldShowOverlay)
+    }
+
+    func testInProgressEventWithoutReminderDoesNotTriggerOverlay() {
+        let event = makeEvent(startingIn: -10, triggersReminder: false)
+        let monitor = makeMonitor(events: [event])
+        monitor.start()
+        XCTAssertFalse(monitor.shouldShowOverlay)
+    }
+
+    func testEventWithoutReminderDoesNotBlockLaterMeeting() {
+        let focus = makeEvent(id: "focus", startingIn: 2, triggersReminder: false)
+        let meeting = makeEvent(id: "meeting", startingIn: 3)
+        let monitor = makeMonitor(events: [focus, meeting])
+        monitor.start()
+        XCTAssertEqual(monitor.activeOverlayEvent?.id, "meeting")
+    }
+
+    func testEndReminderNotFiredForEventWithoutReminder() {
+        let event = makeEvent(id: "focus", startingIn: -29, duration: 30, triggersReminder: false)
+        let monitor = makeMonitor(events: [event])
+        UserDefaults.standard.set(2, forKey: "endReminderMinutes")
+        monitor.start()
+        XCTAssertFalse(monitor.shouldShowOverlay)
+    }
+
+    func testEventWithoutReminderDoesNotSuppressEndReminderAsBackToBack() {
+        UserDefaults.standard.set(5, forKey: "reminderMinutes")
+        let current = makeEvent(id: "current", startingIn: -29, duration: 30)
+        let focus = makeEvent(id: "focus", startingIn: 3, duration: 30, triggersReminder: false)
+        let monitor = makeMonitor(events: [current, focus])
+        UserDefaults.standard.set(2, forKey: "endReminderMinutes")
+        monitor.start()
+        monitor.dismiss() // dismiss start-reminder for `current`
+        monitor.start()
+        XCTAssertTrue(monitor.shouldShowOverlay)
+        XCTAssertEqual(monitor.activeOverlayKind, .ending)
+        XCTAssertEqual(monitor.activeOverlayEvent?.id, "current")
     }
 }
 

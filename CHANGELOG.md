@@ -2,6 +2,11 @@
 
 All notable changes to Meeting Reminder will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- "Which events trigger reminders" settings: only remind about meetings (video link or another participant), skip events marked as Free, and ignore events whose title contains given keywords. Filtered events stay in the menu bar list, dimmed with a bell-slash icon, and are ignored by overlays and the floating countdown
+
 ## [1.0.1] - 2026-02-19
 
 ### Fixed
