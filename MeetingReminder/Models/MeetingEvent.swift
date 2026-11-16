@@ -55,19 +55,35 @@ struct MeetingEvent: Identifiable, Equatable {
         }
     }
 
+    /// Fallback identity independent of EventKit identifiers, used to avoid
+    /// re-showing an overlay when an event's identifier changes between refreshes.
+    var dedupKey: String {
+        "\(title)|\(startDate.timeIntervalSince1970)"
+    }
+
+    private static func nonEmpty(_ value: String?) -> String? {
+        guard let value, !value.isEmpty else { return nil }
+        return value
+    }
+
     static func == (lhs: MeetingEvent, rhs: MeetingEvent) -> Bool {
         lhs.id == rhs.id
     }
 
     init(from ekEvent: EKEvent, videoLink: URL?, triggersReminder: Bool = true) {
-        // Use eventIdentifier + startDate to uniquely identify recurring event occurrences
-        let baseID = ekEvent.eventIdentifier ?? UUID().uuidString
+        // Base ID must be stable across EventKit refreshes: `eventIdentifier` can change
+        // after a calendar sync (or be nil), which made dismissed meetings re-trigger.
+        // startDate suffix distinguishes occurrences of recurring events.
+        let baseID = Self.nonEmpty(ekEvent.calendarItemExternalIdentifier)
+            ?? Self.nonEmpty(ekEvent.calendarItemIdentifier)
+            ?? Self.nonEmpty(ekEvent.eventIdentifier)
+            ?? "\(ekEvent.title ?? "")|\(ekEvent.calendar?.calendarIdentifier ?? "")"
         let dateStamp = ISO8601DateFormatter().string(from: ekEvent.startDate)
         self.id = "\(baseID)_\(dateStamp)"
         self.title = ekEvent.title ?? "Untitled Meeting"
         self.startDate = ekEvent.startDate
         self.endDate = ekEvent.endDate
-        self.calendar = ekEvent.calendar.title
+        self.calendar = ekEvent.calendar?.title ?? ""
         self.calendarColor = ""
         self.videoLink = videoLink
         self.isAllDay = ekEvent.isAllDay

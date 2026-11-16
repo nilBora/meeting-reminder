@@ -23,6 +23,10 @@ final class MeetingMonitor: ObservableObject {
     private var shownEventIDs: Set<String> = []
     private var snoozedEvents: [String: Date] = [:]
     private var endReminderShownEventIDs: Set<String> = []
+    // Fallback keys (title + start) so an event whose EventKit identifier changes
+    // between refreshes is still recognised as already shown.
+    private var shownDedupKeys: Set<String> = []
+    private var endReminderShownDedupKeys: Set<String> = []
     private var endReminderSnoozes: [String: Date] = [:]
     private var lastCleanupDate: Date = Date()
     private var cancellables = Set<AnyCancellable>()
@@ -72,15 +76,18 @@ final class MeetingMonitor: ObservableObject {
         case .start:
             snoozedEvents[event.id] = requested
             shownEventIDs.remove(event.id)
+            shownDedupKeys.remove(event.dedupKey)
         case .ending:
             // Never snooze past the meeting's end time.
             let until = min(requested, event.endDate)
             if until > Date() {
                 endReminderSnoozes[event.id] = until
                 endReminderShownEventIDs.remove(event.id)
+                endReminderShownDedupKeys.remove(event.dedupKey)
             } else {
                 // Meeting already ended — treat as acknowledge.
                 endReminderShownEventIDs.insert(event.id)
+                endReminderShownDedupKeys.insert(event.dedupKey)
             }
         }
         dismiss()
@@ -113,8 +120,10 @@ final class MeetingMonitor: ObservableObject {
         // Reset shown IDs at the start of a new day
         if !Calendar.current.isDate(now, inSameDayAs: lastCleanupDate) {
             shownEventIDs.removeAll()
+            shownDedupKeys.removeAll()
             snoozedEvents.removeAll()
             endReminderShownEventIDs.removeAll()
+            endReminderShownDedupKeys.removeAll()
             endReminderSnoozes.removeAll()
             lastCleanupDate = now
         }
@@ -136,7 +145,8 @@ final class MeetingMonitor: ObservableObject {
             let timeUntil = event.startDate.timeIntervalSince(now)
 
             // Skip if already shown
-            guard !shownEventIDs.contains(event.id) else { continue }
+            guard !shownEventIDs.contains(event.id),
+                  !shownDedupKeys.contains(event.dedupKey) else { continue }
 
             // Skip if snoozed and snooze hasn't expired
             if let snoozeUntil = snoozedEvents[event.id], now < snoozeUntil {
@@ -165,7 +175,8 @@ final class MeetingMonitor: ObservableObject {
 
         for event in calendarService.events where event.triggersReminder {
             // Skip if user acknowledged this meeting's end-reminder
-            if endReminderShownEventIDs.contains(event.id) { continue }
+            if endReminderShownEventIDs.contains(event.id) ||
+               endReminderShownDedupKeys.contains(event.dedupKey) { continue }
 
             // Skip if snoozed and snooze hasn't expired
             if let snoozeUntil = endReminderSnoozes[event.id], now < snoozeUntil {
@@ -199,8 +210,10 @@ final class MeetingMonitor: ObservableObject {
         switch kind {
         case .start:
             shownEventIDs.insert(event.id)
+            shownDedupKeys.insert(event.dedupKey)
         case .ending:
             endReminderShownEventIDs.insert(event.id)
+            endReminderShownDedupKeys.insert(event.dedupKey)
         }
         activeOverlayKind = kind
         activeOverlayEvent = event
