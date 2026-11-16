@@ -123,6 +123,28 @@ final class MeetingMonitorTests: XCTestCase {
         XCTAssertFalse(monitor.shouldShowOverlay)
     }
 
+    func testDismissedEventDoesNotRetriggerWhenIdChanges() {
+        // Overlay shown ~1 min before start and dismissed.
+        let start = Date().addingTimeInterval(60)
+        let original = MeetingEvent(id: "ek-1_stamp", title: "Standup", startDate: start,
+                                    endDate: start.addingTimeInterval(30 * 60), calendar: "Work")
+        let service = MockCalendarService(events: [original])
+        let monitor = MeetingMonitor(calendarService: service)
+        UserDefaults.standard.set(false, forKey: "soundEnabled")
+        UserDefaults.standard.set(5, forKey: "reminderMinutes")
+        UserDefaults.standard.set(0, forKey: "endReminderMinutes")
+        monitor.start()
+        XCTAssertTrue(monitor.shouldShowOverlay)
+        monitor.dismiss()
+
+        // Calendar refresh returns the same meeting under a new EventKit identifier.
+        let refreshed = MeetingEvent(id: "ek-2_stamp", title: "Standup", startDate: start,
+                                     endDate: start.addingTimeInterval(30 * 60), calendar: "Work")
+        service.events = [refreshed]
+        monitor.start()
+        XCTAssertFalse(monitor.shouldShowOverlay, "Same meeting with changed id must not re-trigger")
+    }
+
     // MARK: - End-of-meeting reminder
 
     func testEndReminderDisabledByDefault() {
